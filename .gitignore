@@ -1,0 +1,7 @@
+# Python cache
+__pycache__/
+
+myenv/
+__pycache__/
+db.sqlite3
+.env

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home page</title>
+    <style>
+        body {
+            background-color: rgb(9, 234, 80);
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            border: 1px solid black;
+            border-radius: 10px;
+            color: black;
+            background-color: rgb(76, 76, 156);
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .btn {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: rgb(162, 176, 189);
+            color: rgb(220, 20, 123);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .ph {
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 10px;
+            width: 300px;
+        }
+
+        .ph:hover {
+            border-width: 10px;
+            border-color: rgb(220, 20, 123);
+        }
+
+        .txt {
+            color: white;
+            text-align: center;
+            text-decoration: underline;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    hello!
+
+    <div class="container">
+        <form action="{% url 'home' %}" method="post">
+            {% csrf_token %}
+            <h4 class="txt">Download your favourite videos</h4>
+            <input class="ph" type="text" id="link" name="link"
+                placeholder="Enter the URL of the video you want to download">
+            <button class="btn" type="button" onclick="startDownload()">Download</button>
+            <h1>{{message}}</h1>
+            <h1 id="status">Status: Idle</h1>
+            <h1 id="downloaded">Downloaded: 0 MB</h1><h1 id="total">Total: 0 MB</h1>
+            <h1 id="percent">Progress: 0%</h1>
+        </form>
+    </div>
+    <script>
+        function getCookie(name) {
+            return document.cookie.split('; ').find(r => r.startsWith(name + '=')).split('=')[1];
+        }
+        
+        let interval = null;
+        function startDownload() {
+            let link = document.getElementById('link').value;
+
+            //send link to django
+            fetch('/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `link=${encodeURIComponent(link)}`
+            });
+
+            //update progress every second
+            interval = setInterval(getProgress, 1000);
+        }
+
+        //get progress from django
+        function getProgress() {
+            fetch('/progress/')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').innerText = `Status: ${data.status}`;
+                    document.getElementById('percent').innerText = `Progress: ${data.percentage}`;
+                    document.getElementById('downloaded').innerText = `Downloaded: ${data.downloaded}`;
+                    document.getElementById('total').innerText = `Total: ${data.total}`;
+                    if (data.status === "Download completed") clearInterval(interval);
+                });
+            // inside getProgress:
+        }
+    </script>
+</body>
+
+</html>
