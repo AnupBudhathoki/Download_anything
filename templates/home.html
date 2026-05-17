@@ -71,7 +71,8 @@
             <button class="btn" type="button" onclick="startDownload()">Download</button>
             <h1>{{message}}</h1>
             <h1 id="status">Status: Idle</h1>
-            <h1 id="downloaded">Downloaded: 0 MB</h1><h1 id="total">Total: 0 MB</h1>
+            <h1 id="downloaded">Downloaded: 0 MB</h1>
+            <h1 id="total">Total: 0 MB</h1>
             <h1 id="percent">Progress: 0%</h1>
         </form>
     </div>
@@ -79,7 +80,7 @@
         function getCookie(name) {
             return document.cookie.split('; ').find(r => r.startsWith(name + '=')).split('=')[1];
         }
-        
+
         let interval = null;
         function startDownload() {
             let link = document.getElementById('link').value;
@@ -104,7 +105,10 @@
                     document.getElementById('percent').innerText = `Progress: ${data.percentage}`;
                     document.getElementById('downloaded').innerText = `Downloaded: ${data.downloaded}`;
                     document.getElementById('total').innerText = `Total: ${data.total}`;
-                    if (data.status === "Download completed") clearInterval(interval);
+
+                    if (data.status === "Download completed" && data.filename) {
+                        window.location.href = `/download/${data.filename}`;
+                    }
                 });
             // inside getProgress:
         }
